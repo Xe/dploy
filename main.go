@@ -118,22 +118,16 @@ outer:
 
 	log.Println("Shaping 1/3 (75 old / 25 new)")
 
-	err = bp.Shape(*endpoint, map[string]int{
-		oldRoute.ID: 75,
-		*routeID:    25,
-	})
+	err = shape(bp, oldRoute.ID, *routeID, 75, 25)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(*shapePause)
 
 	log.Println("Shaping 2/3 (50 old / 50 new)")
 
-	err = bp.Shape(*endpoint, map[string]int{
-		oldRoute.ID: 50,
-		*routeID:    50,
-	})
+	err = shape(bp, oldRoute.ID, *routeID, 50, 50)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -142,25 +136,20 @@ outer:
 
 	log.Println("Shaping 3/3 (25 old / 75 new)")
 
-	err = bp.Shape(*endpoint, map[string]int{
-		oldRoute.ID: 25,
-		*routeID:    75,
-	})
+	err = shape(bp, oldRoute.ID, *routeID, 25, 75)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	time.Sleep(*shapePause)
 
-	err = bp.Shape(*endpoint, map[string]int{
-		oldRoute.ID: 0,
-		*routeID:    100,
-	})
+	err = shape(bp, oldRoute.ID, *routeID, 0, 100)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Println("100% of traffic has been shaped over to " + *routeID)
+	log.Println("Deploy complete")
 }
 
 /*
@@ -233,4 +222,16 @@ func createRoute(c *client.Client, bp *backplane.Client) (string, error) {
 
 	log.Printf("Created %s for %s", route.ID, *endpoint)
 	return route.ID, nil
+}
+
+func shape(bp *backplane.Client, oldroute, newroute string, oldweight, newweight int) error {
+	err := bp.Shape(*endpoint, map[string]int{
+		oldroute: oldweight,
+		newroute: newweight,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -181,7 +181,7 @@ type shapeRequest struct {
 // Shape changes the weights on Routes of a given Endpoint.
 func (c *Client) Shape(endpoint string, weights map[string]int) error {
 	routes := []Route{}
-	a
+
 	for route, weight := range weights {
 		routes = append(routes, Route{
 			ID:     route,
