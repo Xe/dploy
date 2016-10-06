@@ -21,7 +21,7 @@ var (
 	serviceName       = flag.String("service-name", "", "name of the service")
 	backplaneToken    = flag.String("backplane-token", "", "backplane token, or BACKPLANE_TOKEN from env")
 	endpoint          = flag.String("endpoint", "", "endpoint to route application traffic to")
-	routeID           = flag.String("route", "", "existing route ID to shape to if it exists already")
+	routeID           = flag.String("route", "", "existing route ID to shape to")
 	shapePause        = flag.Duration("shape-pause", 30*time.Second, "how long to wait between each step of backend shaping")
 	dontCreateService = flag.Bool("dont-create-service", false, "don't create the service")
 )
@@ -69,7 +69,7 @@ func main() {
 
 	waitForContainers(bp)
 
-	log.Printf("Service %s at version %s is now all ready for traffic", *serviceName, *versionID)
+	log.Printf("Service %s at version %s is now ready for traffic", *serviceName, *versionID)
 
 	log.Println("Performing 0 downtime shape (3 steps)")
 	log.Println("In case of emergency, press ^C") // TODO(Xe): Implement this, have it roll back changes
@@ -236,6 +236,7 @@ outer:
 			for _, route := range e.Routes {
 				if route.ID == *routeID {
 					if len(route.Backends) == int(*replicaCount) {
+						log.Println("Target route has all needed backends connected")
 						break outer
 					}
 				}
