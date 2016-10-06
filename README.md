@@ -5,4 +5,4 @@ The simplest way to production. Powered by [Docker](https://docker.com) and [Bac
 
 Example:
 
-![](https://puu.sh/rzsRT/505a9772b5.png)
+[![](https://puu.sh/rzsRT/505a9772b5.png)](https://asciinema.org/a/35lcvx81eda271v5iajycnrsx)
