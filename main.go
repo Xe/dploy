@@ -52,6 +52,8 @@ func main() {
 		}
 
 		log.Println("Created service " + id)
+	} else {
+		log.Println("Skipping service creation")
 	}
 
 	if *routeID == "" {
@@ -59,35 +61,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	} else {
+		log.Println("Skipping route creation, using " + *routeID)
 	}
 
 	log.Println("Waiting for services to be primed...")
 
-	t := time.Tick(time.Second)
-
-outer:
-	for {
-		<-t
-
-		q, err := bp.Query()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, e := range q.Endpoints {
-			if *endpoint != e.Pattern {
-				continue
-			}
-
-			for _, route := range e.Routes {
-				if route.ID == *routeID {
-					if len(route.Backends) == int(*replicaCount) {
-						break outer
-					}
-				}
-			}
-		}
-	}
+	waitForContainers(bp)
 
 	log.Printf("Service %s at version %s is now all ready for traffic", *serviceName, *versionID)
 
@@ -234,4 +214,32 @@ func shape(bp *backplane.Client, oldroute, newroute string, oldweight, newweight
 	}
 
 	return nil
+}
+
+func waitForContainers(bp *backplane.Client) {
+	t := time.Tick(time.Second)
+
+outer:
+	for {
+		<-t
+
+		q, err := bp.Query()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, e := range q.Endpoints {
+			if *endpoint != e.Pattern {
+				continue
+			}
+
+			for _, route := range e.Routes {
+				if route.ID == *routeID {
+					if len(route.Backends) == int(*replicaCount) {
+						break outer
+					}
+				}
+			}
+		}
+	}
 }
