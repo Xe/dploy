@@ -65,9 +65,11 @@ func (c *Client) API(method, path string, parameters map[string]string, postData
 		return errors.New("backplane: request failed " + string(rbody))
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(out)
-	if err != nil {
-		return err
+	if out != nil {
+		err = json.NewDecoder(resp.Body).Decode(out)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
